@@ -1,0 +1,13 @@
+{
+  "name": "kdn-security-guide",
+  "version": "1.1.0",
+  "description": "KDN 정보보안팀 보안관제 실무 가이드",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/inject-env.js",
+    "dev":   "node scripts/inject-env.js && npx serve dist"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

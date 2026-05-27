@@ -286,9 +286,226 @@ footer li{margin-bottom:var(--s2)}
   .topbar{display:none}
   .nav-links{display:none}
 }
+
+/* ══════════════════════════════════════════
+   AUTH OVERLAY  (Supabase Magic Link)
+══════════════════════════════════════════ */
+/* 인증 전 메인 콘텐츠 숨김 */
+body:not(.auth-ready) .topbar,
+body:not(.auth-ready) .navbar,
+body:not(.auth-ready) .hero,
+body:not(.auth-ready) .shell,
+body:not(.auth-ready) footer{visibility:hidden}
+
+.auth-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--hero-bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--s5);
+  transition:opacity .35s ease;
+}
+.auth-overlay.auth-overlay--hidden{opacity:0;pointer-events:none}
+
+.auth-card{
+  width:100%;max-width:440px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:var(--radius-xl);
+  padding:var(--s8) var(--s7);
+  text-align:center;position:relative;
+  backdrop-filter:blur(20px);
+  box-shadow:0 32px 96px rgba(0,0,0,.5),
+             0 0 0 1px rgba(255,255,255,.05) inset;
+}
+.auth-bg-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(61,111,224,.28),transparent);
+  border-radius:inherit;pointer-events:none;
+}
+.auth-logo{
+  width:68px;height:68px;
+  background:rgba(61,111,224,.18);
+  border:1px solid rgba(61,111,224,.45);
+  border-radius:var(--radius-lg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.85rem;margin:0 auto var(--s5);
+  box-shadow:0 0 28px rgba(61,111,224,.25);
+}
+.auth-title{
+  font-size:1.55rem;font-weight:800;color:#fff;
+  margin-bottom:var(--s1);letter-spacing:-.02em;
+}
+.auth-subtitle{
+  font-size:.95rem;color:var(--gold-light);
+  font-weight:600;margin-bottom:var(--s5);
+}
+.auth-desc{
+  font-size:.855rem;color:rgba(255,255,255,.62);
+  line-height:1.75;margin-bottom:var(--s6);
+}
+.auth-divider{
+  height:1px;background:rgba(255,255,255,.1);
+  margin:0 0 var(--s5);
+}
+.auth-input-wrap{position:relative;margin-bottom:var(--s3)}
+.auth-input-icon{
+  position:absolute;left:var(--s4);top:50%;
+  transform:translateY(-50%);font-size:.95rem;pointer-events:none;
+}
+.auth-input{
+  width:100%;
+  padding:var(--s4) var(--s4) var(--s4) calc(var(--s4) + 1.6rem);
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:var(--radius-sm);
+  color:#fff;font-size:.95rem;
+  font-family:inherit;outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.auth-input::placeholder{color:rgba(255,255,255,.38)}
+.auth-input:focus{
+  border-color:var(--gold);
+  background:rgba(61,111,224,.13);
+  box-shadow:0 0 0 3px rgba(61,111,224,.18);
+}
+.auth-btn{
+  width:100%;padding:var(--s4) var(--s5);
+  background:var(--gold);color:#fff;
+  border:none;border-radius:var(--radius-sm);
+  font-size:.95rem;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .2s;
+  margin-top:var(--s2);letter-spacing:.03em;
+  box-shadow:0 4px 16px rgba(61,111,224,.35);
+}
+.auth-btn:hover:not(:disabled){
+  background:var(--gold-light);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(61,111,224,.45);
+}
+.auth-btn:active:not(:disabled){transform:translateY(0)}
+.auth-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.auth-btn-outline{
+  background:transparent;color:rgba(255,255,255,.65);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:var(--radius-sm);
+  padding:var(--s3) var(--s5);
+  font-size:.85rem;font-family:inherit;
+  cursor:pointer;margin-top:var(--s4);
+  transition:all .2s;
+}
+.auth-btn-outline:hover{border-color:rgba(255,255,255,.5);color:#fff}
+.auth-error-box{
+  background:rgba(231,74,90,.14);
+  border:1px solid rgba(231,74,90,.32);
+  border-radius:var(--radius-sm);
+  padding:var(--s3) var(--s4);
+  color:#fca5a5;font-size:.84rem;
+  margin-bottom:var(--s3);
+  display:none;
+}
+.auth-error-box.visible{display:block}
+.auth-sent{padding:var(--s3) 0}
+.auth-sent-icon{font-size:2.6rem;margin-bottom:var(--s4)}
+.auth-sent h3{
+  color:var(--green);font-size:1.1rem;
+  margin-bottom:var(--s3);
+}
+.auth-sent p{
+  font-size:.875rem;color:rgba(255,255,255,.68);
+  line-height:1.75;
+}
+.auth-notice{
+  font-size:.72rem;color:rgba(255,255,255,.38);
+  margin-top:var(--s6);letter-spacing:.02em;
+  line-height:1.6;
+}
+
+/* 로그아웃 버튼 (navbar) */
+.logout-btn{
+  background:none;border:1px solid rgba(231,74,90,.4);
+  border-radius:var(--radius-sm);
+  padding:var(--s2) var(--s3);cursor:pointer;
+  font-size:.85rem;color:var(--red);
+  transition:all .2s;font-family:inherit;
+  display:none;  /* showApp()에서 표시 */
+}
+.logout-btn:hover{border-color:var(--red);background:rgba(231,74,90,.08)}
+
+/* 인증된 사용자 이메일 (topbar) */
+.auth-user-pill{
+  display:none;  /* showApp()에서 표시 */
+  align-items:center;gap:var(--s2);
+  background:rgba(61,111,224,.2);
+  border:1px solid rgba(61,111,224,.35);
+  border-radius:var(--radius);
+  padding:2px var(--s3);
+  font-size:.75rem;color:var(--gold-light);
+  font-weight:500;
+}
 </style>
+<!-- Supabase Auth SDK (UMD) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════
+     AUTH OVERLAY  —  Supabase Magic Link
+══════════════════════════════════════════ -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-bg-glow"></div>
+
+    <!-- 로고 & 타이틀 -->
+    <div class="auth-logo">🛡️</div>
+    <h1 class="auth-title">KDN 보안관제</h1>
+    <p class="auth-subtitle">실무 가이드 포털</p>
+    <p class="auth-desc">
+      이 포털은 <strong style="color:rgba(255,255,255,.9)">KDN 정보보안팀 인가 임직원</strong>만 접근할 수 있습니다.<br>
+      등록된 이메일로 일회용 로그인 링크를 발송해 드립니다.
+    </p>
+    <div class="auth-divider"></div>
+
+    <!-- 로그인 폼 -->
+    <div id="authFormBox">
+      <div class="auth-input-wrap">
+        <span class="auth-input-icon">✉️</span>
+        <input
+          type="email"
+          id="authEmailInput"
+          class="auth-input"
+          placeholder="이메일 주소를 입력하세요"
+          autocomplete="email"
+          onkeydown="if(event.key==='Enter')sendMagicLink()"
+        />
+      </div>
+      <div class="auth-error-box" id="authErrorBox">
+        <span id="authErrorMsg">오류가 발생했습니다. 다시 시도해 주세요.</span>
+      </div>
+      <button id="authSendBtn" class="auth-btn" onclick="sendMagicLink()">
+        🔗 &nbsp;로그인 링크 전송
+      </button>
+    </div>
+
+    <!-- 발송 완료 상태 -->
+    <div id="authSentBox" style="display:none">
+      <div class="auth-sent">
+        <div class="auth-sent-icon">📬</div>
+        <h3>이메일을 발송했습니다!</h3>
+        <p>
+          받은 편지함을 확인하여 로그인 링크를 클릭해 주세요.<br>
+          링크는 <strong style="color:rgba(255,255,255,.85)">60분</strong>간 유효하며 1회만 사용 가능합니다.
+        </p>
+        <button class="auth-btn-outline" onclick="resetAuthForm()">
+          ← 다른 이메일로 시도
+        </button>
+      </div>
+    </div>
+
+    <p class="auth-notice">
+      🔒 대외비 문서 &nbsp;·&nbsp; 무단 접근 금지 &nbsp;·&nbsp; © 2026 KDN 정보보안팀
+    </p>
+  </div>
+</div>
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -300,6 +517,10 @@ footer li{margin-bottom:var(--s2)}
     <span>KDN 정보보안팀</span>
     <span>|</span>
     <span>대외비</span>
+    <span>|</span>
+    <span class="auth-user-pill" id="authUserPill">
+      👤 <span id="authUserEmail">—</span>
+    </span>
   </div>
 </div>
 
@@ -323,6 +544,7 @@ footer li{margin-bottom:var(--s2)}
   <div class="nav-actions">
     <span class="nav-badge">대외비</span>
     <button class="theme-toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙 다크모드</button>
+    <button id="logoutBtn" class="logout-btn" onclick="handleLogout()">🚪 로그아웃</button>
   </div>
 </nav>
 
@@ -1764,16 +1986,135 @@ footer li{margin-bottom:var(--s2)}
 </footer>
 
 <script>
-// Sidebar active state on scroll
-const sections = document.querySelectorAll('section[id]');
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE AUTH  —  Magic Link (Passwordless Email)
+   ⚠️  아래 두 값을 Supabase 프로젝트 설정에서 복사해 붙여넣으세요.
+   ═══════════════════════════════════════════════════════════════ */
+const SUPABASE_URL      = '__SUPABASE_URL__';
+const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
+
+// Supabase 클라이언트 초기화
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ── UI 헬퍼 ─────────────────────────────────────────────────── */
+function showApp(user) {
+  // 오버레이 숨김
+  const overlay = document.getElementById('authOverlay');
+  overlay.classList.add('auth-overlay--hidden');
+
+  // 메인 콘텐츠 표시
+  document.body.classList.add('auth-ready');
+
+  // Topbar 사용자 이메일 표시
+  const pill  = document.getElementById('authUserPill');
+  const email = document.getElementById('authUserEmail');
+  if (email) email.textContent = user.email;
+  if (pill)  pill.style.display = 'inline-flex';
+
+  // Navbar 로그아웃 버튼 표시
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.style.display = 'block';
+}
+
+function showOverlay() {
+  const overlay = document.getElementById('authOverlay');
+  overlay.classList.remove('auth-overlay--hidden');
+  document.body.classList.remove('auth-ready');
+
+  const pill = document.getElementById('authUserPill');
+  if (pill) pill.style.display = 'none';
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.style.display = 'none';
+}
+
+/* ── 폼 초기화 (다른 이메일로 재시도) ──────────────────────────── */
+function resetAuthForm() {
+  document.getElementById('authSentBox').style.display  = 'none';
+  document.getElementById('authFormBox').style.display  = '';
+  document.getElementById('authSendBtn').disabled       = false;
+  document.getElementById('authSendBtn').innerHTML      = '🔗 &nbsp;로그인 링크 전송';
+  document.getElementById('authErrorBox').classList.remove('visible');
+  document.getElementById('authEmailInput').value       = '';
+}
+
+/* ── 매직 링크 전송 ────────────────────────────────────────────── */
+async function sendMagicLink() {
+  const emailInput = document.getElementById('authEmailInput');
+  const sendBtn    = document.getElementById('authSendBtn');
+  const errorBox   = document.getElementById('authErrorBox');
+  const errorMsg   = document.getElementById('authErrorMsg');
+  const email      = emailInput.value.trim();
+
+  // 간단한 이메일 형식 검사
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errorMsg.textContent = '올바른 이메일 주소를 입력해 주세요.';
+    errorBox.classList.add('visible');
+    emailInput.focus();
+    return;
+  }
+
+  // 버튼 로딩 상태
+  sendBtn.disabled     = true;
+  sendBtn.textContent  = '전송 중…';
+  errorBox.classList.remove('visible');
+
+  const { error } = await _sb.auth.signInWithOtp({
+    email,
+    options: {
+      // 이메일 클릭 후 돌아올 URL (현재 페이지)
+      emailRedirectTo: window.location.href,
+    },
+  });
+
+  if (error) {
+    errorMsg.textContent = error.message || '전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+    errorBox.classList.add('visible');
+    sendBtn.disabled    = false;
+    sendBtn.innerHTML   = '🔗 &nbsp;로그인 링크 전송';
+  } else {
+    document.getElementById('authFormBox').style.display = 'none';
+    document.getElementById('authSentBox').style.display = 'block';
+  }
+}
+
+/* ── 로그아웃 ──────────────────────────────────────────────────── */
+async function handleLogout() {
+  await _sb.auth.signOut();
+  showOverlay();
+  resetAuthForm();
+}
+
+/* ── 인증 초기화 (페이지 로드 시 실행) ──────────────────────────── */
+async function initAuth() {
+  // 현재 세션 확인 (매직 링크 콜백 포함)
+  const { data: { session } } = await _sb.auth.getSession();
+
+  if (session) {
+    showApp(session.user);
+  } else {
+    showOverlay();
+  }
+
+  // 세션 상태 변화 감지 (매직 링크 클릭 후 자동 처리)
+  _sb.auth.onAuthStateChange((_event, session) => {
+    if (session) {
+      showApp(session.user);
+    } else {
+      showOverlay();
+    }
+  });
+}
+
+/* ── 사이드바 스크롤 활성화 ─────────────────────────────────────── */
+const sections    = document.querySelectorAll('section[id]');
 const sidebarItems = document.querySelectorAll('.sidebar-item');
-const navLinks = document.querySelectorAll('.nav-link');
+const navLinks    = document.querySelectorAll('.nav-link');
 
 function updateActive() {
   let current = '';
   sections.forEach(s => {
-    const top = s.getBoundingClientRect().top;
-    if (top <= 100) current = s.id;
+    if (s.getBoundingClientRect().top <= 100) current = s.id;
   });
   sidebarItems.forEach(item => {
     const href = item.getAttribute('onclick') || '';
@@ -1785,6 +2126,9 @@ function updateActive() {
 }
 window.addEventListener('scroll', updateActive);
 updateActive();
+
+/* ── 앱 시작 ────────────────────────────────────────────────────── */
+initAuth();
 </script>
 </body>
 </html>
