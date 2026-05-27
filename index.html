@@ -2046,7 +2046,7 @@ async function sendMagicLink() {
   const errorMsg   = document.getElementById('authErrorMsg');
   const email      = emailInput.value.trim();
 
-  // 간단한 이메일 형식 검사
+  // 이메일 형식 검사
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errorMsg.textContent = '올바른 이메일 주소를 입력해 주세요.';
     errorBox.classList.add('visible');
@@ -2055,26 +2055,37 @@ async function sendMagicLink() {
   }
 
   // 버튼 로딩 상태
-  sendBtn.disabled     = true;
-  sendBtn.textContent  = '전송 중…';
+  sendBtn.disabled    = true;
+  sendBtn.textContent = '전송 중…';
   errorBox.classList.remove('visible');
 
-  const { error } = await _sb.auth.signInWithOtp({
-    email,
-    options: {
-      // 이메일 클릭 후 돌아올 URL (현재 페이지)
-      emailRedirectTo: window.location.href,
-    },
-  });
+  // 타임아웃 + try-catch 로 모든 예외 처리
+  const TIMEOUT_MS = 10000;
+  try {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('요청 시간이 초과됐습니다. 네트워크 상태를 확인해 주세요.')), TIMEOUT_MS)
+    );
 
-  if (error) {
-    errorMsg.textContent = error.message || '전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
-    errorBox.classList.add('visible');
-    sendBtn.disabled    = false;
-    sendBtn.innerHTML   = '🔗 &nbsp;로그인 링크 전송';
-  } else {
+    const otpPromise = _sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + window.location.pathname },
+    });
+
+    const { error } = await Promise.race([otpPromise, timeoutPromise]);
+
+    if (error) {
+      throw new Error(error.message || '전송 중 오류가 발생했습니다.');
+    }
+
     document.getElementById('authFormBox').style.display = 'none';
     document.getElementById('authSentBox').style.display = 'block';
+
+  } catch (err) {
+    errorMsg.textContent = err.message || '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+    errorBox.classList.add('visible');
+    sendBtn.disabled   = false;
+    sendBtn.innerHTML  = '🔗 &nbsp;로그인 링크 전송';
+    console.error('[Auth] sendMagicLink 오류:', err);
   }
 }
 
