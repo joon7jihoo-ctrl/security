@@ -442,6 +442,46 @@ body:not(.auth-ready) footer{visibility:hidden}
   font-size:.75rem;color:var(--gold-light);
   font-weight:500;
 }
+
+/* ══════════ NAV DROPDOWN ══════════ */
+.nav-dropdown{position:relative}
+.nav-dropdown-btn{background:none;border:none;font-family:inherit;display:flex;align-items:center;
+  gap:4px;padding:var(--s2) var(--s4);border-radius:var(--radius-sm);font-size:.9rem;font-weight:500;
+  color:var(--ink-soft);transition:all .2s;cursor:pointer}
+.nav-dropdown-btn:hover,.nav-dropdown-btn.active{background:var(--bg-alt);color:var(--gold)}
+.nav-dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);
+  min-width:180px;box-shadow:0 8px 24px rgba(15,27,51,.12);z-index:200;
+  flex-direction:column;padding:var(--s2) 0}
+.nav-dropdown:hover .nav-dropdown-menu{display:flex}
+.nav-dropdown-item{padding:var(--s3) var(--s4);font-size:.88rem;color:var(--ink-soft);
+  cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none;display:block}
+.nav-dropdown-item:hover{background:var(--bg-alt);color:var(--gold)}
+.nav-board-link{padding:var(--s2) var(--s4);border-radius:var(--radius-sm);font-size:.9rem;
+  font-weight:600;color:var(--gold);border:1px solid rgba(61,111,224,.3);
+  background:rgba(61,111,224,.06);transition:all .2s;cursor:pointer;text-decoration:none}
+.nav-board-link:hover{background:rgba(61,111,224,.14);border-color:var(--gold)}
+
+/* ══════════ SIDEBAR SUBGROUP ══════════ */
+.sidebar-group-hdr{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s3);
+  border-radius:var(--radius-sm);cursor:pointer;font-size:.88rem;color:var(--ink-soft);
+  transition:all .2s;user-select:none}
+.sidebar-group-hdr:hover{background:var(--bg-alt);color:var(--ink)}
+.sidebar-group-hdr.active{color:var(--gold);font-weight:600}
+.sidebar-group-hdr .s-dot{width:6px;height:6px;border-radius:50%;background:var(--line-strong);
+  flex-shrink:0;transition:all .2s}
+.sidebar-group-hdr.active .s-dot{background:var(--gold)}
+.caret{font-size:.6rem;margin-left:auto;transition:transform .2s;color:var(--navy-400)}
+.sidebar-group-hdr.open .caret{transform:rotate(180deg)}
+.sidebar-subnav{display:none;flex-direction:column;gap:1px;padding-left:var(--s5);margin-top:2px}
+.sidebar-subnav.open{display:flex}
+.sidebar-subitem{display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s3);
+  border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;color:var(--ink-soft);transition:all .2s}
+.sidebar-subitem:hover{background:var(--bg-alt);color:var(--ink)}
+.sidebar-subitem.active{color:var(--gold);font-weight:600}
+.sidebar-subitem::before{content:'';width:4px;height:4px;border-radius:50%;
+  background:var(--line-strong);flex-shrink:0;transition:all .2s}
+.sidebar-subitem.active::before{background:var(--gold)}
 </style>
 <!-- Supabase Auth SDK (UMD) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -529,13 +569,19 @@ body:not(.auth-ready) footer{visibility:hidden}
   <div class="nav-links">
     <a class="nav-link active" href="#overview">인프라 개요</a>
     <a class="nav-link" href="#traffic-flow">트래픽 흐름</a>
-    <a class="nav-link" href="#ddos">DDoS</a>
-    <a class="nav-link" href="#firewall">방화벽</a>
-    <a class="nav-link" href="#ips">IPS</a>
-    <a class="nav-link" href="#waf">WAF</a>
-    <a class="nav-link" href="#visibility">가시화</a>
-    <a class="nav-link" href="#siem">SIEM/SOAR</a>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">🔒 보안 장비 ▾</button>
+      <div class="nav-dropdown-menu">
+        <a class="nav-dropdown-item" href="#ddos">🌊 DDoS 방어</a>
+        <a class="nav-dropdown-item" href="#firewall">🔥 방화벽</a>
+        <a class="nav-dropdown-item" href="#ips">🔬 IPS</a>
+        <a class="nav-dropdown-item" href="#waf">🛡️ WAF</a>
+        <a class="nav-dropdown-item" href="#visibility">👁️ 가시화</a>
+        <a class="nav-dropdown-item" href="#siem">📊 SIEM/SOAR</a>
+      </div>
+    </div>
     <a class="nav-link" href="#pipeline">파이프라인</a>
+    <a class="nav-board-link" href="board.html">📋 게시판</a>
   </div>
   <div class="nav-actions">
     <span class="nav-badge">대외비</span>
@@ -798,7 +844,7 @@ body:not(.auth-ready) footer{visibility:hidden}
 <aside class="sidebar">
   <div class="sidebar-label">목차</div>
   <nav class="sidebar-nav">
-    <div class="sidebar-item active" onclick="scrollTo('#overview')">
+    <div class="sidebar-item active" onclick="location.href='#overview'">
       <span class="s-dot"></span> 인프라 개요
       <span class="sidebar-num">00</span>
     </div>
@@ -806,30 +852,22 @@ body:not(.auth-ready) footer{visibility:hidden}
       <span class="s-dot"></span> 트래픽 흐름도
       <span class="sidebar-num">01</span>
     </div>
-    <div class="sidebar-item" onclick="location.href='#ddos'">
-      <span class="s-dot"></span> DDoS 방어 시스템
-      <span class="sidebar-num">02</span>
+
+    <!-- 보안 장비 그룹 -->
+    <div class="sidebar-group-hdr" id="devGroupHdr" onclick="toggleDevGroup()">
+      <span class="s-dot"></span> 보안 장비
+      <span class="sidebar-num">02~07</span>
+      <span class="caret">▼</span>
     </div>
-    <div class="sidebar-item" onclick="location.href='#firewall'">
-      <span class="s-dot"></span> 방화벽 (Firewall)
-      <span class="sidebar-num">03</span>
+    <div class="sidebar-subnav" id="devSubnav">
+      <div class="sidebar-subitem" onclick="location.href='#ddos'">🌊 DDoS 방어</div>
+      <div class="sidebar-subitem" onclick="location.href='#firewall'">🔥 방화벽</div>
+      <div class="sidebar-subitem" onclick="location.href='#ips'">🔬 IPS</div>
+      <div class="sidebar-subitem" onclick="location.href='#waf'">🛡️ WAF</div>
+      <div class="sidebar-subitem" onclick="location.href='#visibility'">👁️ 가시화</div>
+      <div class="sidebar-subitem" onclick="location.href='#siem'">📊 SIEM/SOAR</div>
     </div>
-    <div class="sidebar-item" onclick="location.href='#ips'">
-      <span class="s-dot"></span> IPS 침입방지시스템
-      <span class="sidebar-num">04</span>
-    </div>
-    <div class="sidebar-item" onclick="location.href='#waf'">
-      <span class="s-dot"></span> WAF 웹방화벽
-      <span class="sidebar-num">05</span>
-    </div>
-    <div class="sidebar-item" onclick="location.href='#visibility'">
-      <span class="s-dot"></span> 가시화 장비
-      <span class="sidebar-num">06</span>
-    </div>
-    <div class="sidebar-item" onclick="location.href='#siem'">
-      <span class="s-dot"></span> SIEM / SOAR
-      <span class="sidebar-num">07</span>
-    </div>
+
     <div class="sidebar-item" onclick="location.href='#pipeline'">
       <span class="s-dot"></span> 보안관제 파이프라인
       <span class="sidebar-num">08</span>
@@ -2129,22 +2167,56 @@ async function initAuth() {
 }
 
 /* ── 사이드바 스크롤 활성화 ─────────────────────────────────────── */
-const sections    = document.querySelectorAll('section[id]');
+const sections     = document.querySelectorAll('section[id]');
 const sidebarItems = document.querySelectorAll('.sidebar-item');
-const navLinks    = document.querySelectorAll('.nav-link');
+const navLinks     = document.querySelectorAll('.nav-link');
+const DEV_IDS      = ['ddos','firewall','ips','waf','visibility','siem'];
+
+function toggleDevGroup() {
+  const hdr = document.getElementById('devGroupHdr');
+  const nav = document.getElementById('devSubnav');
+  hdr.classList.toggle('open');
+  nav.classList.toggle('open');
+}
 
 function updateActive() {
   let current = '';
   sections.forEach(s => {
     if (s.getBoundingClientRect().top <= 100) current = s.id;
   });
+  const isDevSection = DEV_IDS.includes(current);
+
+  // 최상위 사이드바 아이템
   sidebarItems.forEach(item => {
     const href = item.getAttribute('onclick') || '';
     item.classList.toggle('active', href.includes(current));
   });
+
+  // 서브 아이템
+  document.querySelectorAll('.sidebar-subitem').forEach(item => {
+    const href = item.getAttribute('onclick') || '';
+    item.classList.toggle('active', href.includes(current));
+  });
+
+  // 보안 장비 그룹 헤더 + 자동 펼침
+  const grpHdr = document.getElementById('devGroupHdr');
+  const grpNav = document.getElementById('devSubnav');
+  if (grpHdr && grpNav) {
+    grpHdr.classList.toggle('active', isDevSection);
+    if (isDevSection) {
+      grpHdr.classList.add('open');
+      grpNav.classList.add('open');
+    }
+  }
+
+  // 상단 nav 링크
   navLinks.forEach(link => {
     link.classList.toggle('active', link.getAttribute('href') === '#' + current);
   });
+
+  // 드롭다운 버튼 활성화
+  const dropBtn = document.querySelector('.nav-dropdown-btn');
+  if (dropBtn) dropBtn.classList.toggle('active', isDevSection);
 }
 window.addEventListener('scroll', updateActive);
 updateActive();
