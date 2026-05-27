@@ -24,16 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Inject Supabase secrets & build
+      - name: Inject Supabase secrets
         env:
           VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: node scripts/inject-env.js
+        run: |
+          sed -i "s|__SUPABASE_URL__|${VITE_SUPABASE_URL}|g"      index.html
+          sed -i "s|__SUPABASE_ANON_KEY__|${VITE_SUPABASE_ANON_KEY}|g" index.html
+          echo "✅ Supabase secrets injected"
+          grep -c "jxrsjnrqkjqqqbtjuled" index.html && echo "✅ URL 주입 확인" || echo "❌ URL 주입 실패"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -41,7 +40,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist'
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
