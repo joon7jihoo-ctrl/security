@@ -236,6 +236,10 @@ h4{font-size:1.05rem;font-weight:600}
 /* ══════════ SECTION DIVIDER ══════════ */
 .divider{height:1px;background:var(--line);margin:var(--s8) 0}
 
+/* ══════════ SVG DIAGRAMS ══════════ */
+.svg-diagram{margin:var(--s6) 0;overflow-x:auto;border-radius:var(--radius-lg)}
+.svg-diagram svg{width:100%;height:auto;display:block;border-radius:var(--radius-lg)}
+
 /* ══════════ PLAYBOOK ══════════ */
 .playbook{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius-md);
   padding:var(--s5) var(--s6);margin:var(--s5) 0}
@@ -641,54 +645,166 @@ footer li{margin-bottom:var(--s2)}
     가시화 장비와 SIEM은 아웃오브패스(Out-of-Path) 방식으로 트래픽을 미러링하여 수집합니다.
   </p>
 
-  <div class="flow-wrap">
-    <div class="flow-title">▶ Inbound 트래픽 흐름 (인터넷 → 내부 서버)</div>
-    <div class="flow-body">
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │                         인터넷 (Internet)                               │</span>
-<span class="c-block">  └─────────────────────────────┬────────────────────────────────────────────┘</span>
-                               <span class="c-arrow">│  Raw Traffic (HTTP/HTTPS/UDP/TCP/ICMP 등)</span>
-                               <span class="c-arrow">▼</span>
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  ① DDoS 방어 시스템          [L3 / L4 / L7]                           │</span>
-<span class="c-block">  │  ─ Volumetric Attack 탐지 (bps/pps 임계치)                             │</span>
-<span class="c-block">  │  ─ SYN Flood / UDP Flood / ICMP Flood / HTTP Flood 차단               │</span>
-<span class="c-block">  │  ─ BGP Blackhole / Scrubbing Center 연동                               │</span>
-<span class="c-block">  └─────────────────────────────┬────────────────────────────────────────────┘</span>
-                               <span class="c-arrow">│  정제(Scrubbed) 트래픽</span>
-                               <span class="c-arrow">▼</span>
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  ② 방화벽 (Firewall)         [L3 / L4]                                │</span>
-<span class="c-block">  │  ─ Stateful Inspection (5-tuple: src IP·dst IP·src Port·dst Port·Proto)│</span>
-<span class="c-block">  │  ─ ACL(접근제어목록) 기반 허용/차단                                      │</span>
-<span class="c-block">  │  ─ NAT / PAT 처리, Zone 기반 정책 분리 (DMZ / Trust / Untrust)         │</span>
-<span class="c-block">  └─────────────────────────────┬────────────────────────────────────────────┘</span>
-                               <span class="c-arrow">│  허용된 세션(Established Session)</span>
-                               <span class="c-arrow">▼</span>
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  ③ IPS (침입방지시스템)       [L4 / L7]                               │</span>
-<span class="c-block">  │  ─ Deep Packet Inspection (DPI) 페이로드 시그니처 매칭                  │</span>
-<span class="c-block">  │  ─ CVE 기반 취약점 공격 패턴(Exploit) 탐지 및 인라인 차단              │</span>
-<span class="c-block">  │  ─ 프로토콜 이상 탐지(Protocol Anomaly), Rate-Based 탐지               │</span>
-<span class="c-block">  └─────────────────────────────┬────────────────────────────────────────────┘</span>
-                               <span class="c-arrow">│  검증된 패킷</span>
-                               <span class="c-arrow">▼</span>
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  ④ WAF (웹 방화벽)           [L7 / HTTP·HTTPS]                        │</span>
-<span class="c-block">  │  ─ HTTP 요청/응답 전체 파싱 (헤더·바디·쿠키·URL 파라미터)               │</span>
-<span class="c-block">  │  ─ OWASP Top 10 룰셋 적용 (SQLi / XSS / CSRF / LFI / RCE 등)         │</span>
-<span class="c-block">  │  ─ SSL/TLS 복호화(Offloading) 후 검사 → 재암호화 전달                  │</span>
-<span class="c-block">  └─────────────────────────────┬────────────────────────────────────────────┘</span>
-                               <span class="c-arrow">│  클린(Clean) HTTP 요청</span>
-                               <span class="c-arrow">▼</span>
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │         내부 서버 (Web Server / WAS / DB)                               │</span>
-<span class="c-block">  └──────────────────────────────────────────────────────────────────────────┘</span>
+  <div class="svg-diagram">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 498" role="img" aria-label="네트워크 트래픽 흐름도 SVG">
+    <defs>
+      <linearGradient id="tfBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#0A1428"/></linearGradient>
+      <linearGradient id="tfCard" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E2D48"/><stop offset="100%" stop-color="#152038"/></linearGradient>
+      <marker id="tfAB" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#3D6FE0"/></marker>
+      <marker id="tfAG" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#4AE79A"/></marker>
+      <marker id="tfAP" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#9B59B6"/></marker>
+      <filter id="tfGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.5" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+      <pattern id="tfDot" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.6" fill="#fff" opacity="0.03"/></pattern>
+    </defs>
+    <!-- BG -->
+    <rect width="800" height="498" rx="12" fill="url(#tfBg)"/>
+    <rect width="800" height="498" rx="12" fill="url(#tfDot)"/>
+    <text x="400" y="20" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="2" font-family="Segoe UI,sans-serif" fill="#3D6FE0">INBOUND TRAFFIC FLOW  ·  KDN 보안관제 인프라</text>
 
-<span class="c-note">  ─── Out-of-Path (병렬 수집) ────────────────────────────────────────────</span>
-<span class="c-label">  ⑤ 가시화 장비  ←── TAP / SPAN 포트 미러링 ── 스위치 구간 전체</span>
-<span class="c-label">  ⑥ eyecloudxoar  ←── Syslog / SNMP / API  ── ①~⑤ 장비 전체</span>
-    </div>
+    <!-- INTERNET -->
+    <rect x="18" y="28" width="498" height="48" rx="6" fill="#0C1626" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="42" cy="52" r="12" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <ellipse cx="42" cy="52" rx="6" ry="12" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+    <line x1="30" y1="52" x2="54" y2="52" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+    <text x="62" y="48" font-size="12" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.9)">인터넷 (Internet)</text>
+    <text x="62" y="63" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.35)">Raw Traffic · HTTP/HTTPS · TCP · UDP · ICMP</text>
+
+    <!-- Arrow1 -->
+    <line x1="267" y1="76" x2="267" y2="92" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#tfAB)"/>
+    <text x="277" y="87" font-size="8" font-family="Segoe UI,sans-serif" fill="#6B93F0">Raw Traffic</text>
+    <circle r="3" fill="#3D6FE0" filter="url(#tfGlow)"><animateMotion path="M267,76 L267,92" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.4s" repeatCount="indefinite"/></circle>
+
+    <!-- DDoS ① -->
+    <rect x="18" y="94" width="498" height="58" rx="6" fill="url(#tfCard)" stroke="#E74A5A30" stroke-width="1"/>
+    <rect x="18" y="94" width="4" height="58" rx="2" fill="#E74A5A"/>
+    <circle cx="38" cy="123" r="12" fill="#E74A5A15" stroke="#E74A5A50" stroke-width="1"/>
+    <text x="38" y="127.5" text-anchor="middle" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">①</text>
+    <text x="58" y="112" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">DDoS 방어 시스템</text>
+    <rect x="58" y="117" width="58" height="13" rx="3" fill="#E74A5A15" stroke="#E74A5A35"/>
+    <text x="87" y="127" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">L3 / L4 / L7</text>
+    <text x="58" y="143" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">Volumetric 탐지 · BGP Blackhole · Scrubbing Center 연동 · SYN Cookie · Rate-Limit</text>
+
+    <!-- Arrow2 -->
+    <line x1="267" y1="152" x2="267" y2="168" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#tfAB)"/>
+    <text x="277" y="163" font-size="8" font-family="Segoe UI,sans-serif" fill="#6B93F0">정제된 트래픽</text>
+    <circle r="3" fill="#3D6FE0" filter="url(#tfGlow)"><animateMotion path="M267,152 L267,168" dur="2.4s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="0.5s" repeatCount="indefinite"/></circle>
+
+    <!-- Firewall ② -->
+    <rect x="18" y="170" width="498" height="58" rx="6" fill="url(#tfCard)" stroke="#3D6FE030" stroke-width="1"/>
+    <rect x="18" y="170" width="4" height="58" rx="2" fill="#3D6FE0"/>
+    <circle cx="38" cy="199" r="12" fill="#3D6FE015" stroke="#3D6FE050" stroke-width="1"/>
+    <text x="38" y="203.5" text-anchor="middle" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">②</text>
+    <text x="58" y="188" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">방화벽 (Firewall)</text>
+    <rect x="58" y="193" width="44" height="13" rx="3" fill="#3D6FE015" stroke="#3D6FE035"/>
+    <text x="80" y="203" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">L3 / L4</text>
+    <text x="58" y="219" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">Stateful Inspection · 5-tuple ACL · Zone 분리 (Untrust / DMZ / Trust) · NAT/PAT</text>
+
+    <!-- Arrow3 -->
+    <line x1="267" y1="228" x2="267" y2="244" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#tfAB)"/>
+    <text x="277" y="239" font-size="8" font-family="Segoe UI,sans-serif" fill="#6B93F0">허용된 세션</text>
+    <circle r="3" fill="#3D6FE0" filter="url(#tfGlow)"><animateMotion path="M267,228 L267,244" dur="2.4s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1s" repeatCount="indefinite"/></circle>
+
+    <!-- IPS ③ -->
+    <rect x="18" y="246" width="498" height="58" rx="6" fill="url(#tfCard)" stroke="#4AE79A30" stroke-width="1"/>
+    <rect x="18" y="246" width="4" height="58" rx="2" fill="#4AE79A"/>
+    <circle cx="38" cy="275" r="12" fill="#4AE79A15" stroke="#4AE79A50" stroke-width="1"/>
+    <text x="38" y="279.5" text-anchor="middle" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">③</text>
+    <text x="58" y="264" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">IPS 침입방지시스템</text>
+    <rect x="58" y="269" width="48" height="13" rx="3" fill="#4AE79A15" stroke="#4AE79A35"/>
+    <text x="82" y="279" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">L4 / L7</text>
+    <text x="58" y="295" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">DPI 페이로드 검사 · CVE 시그니처 매칭 · 프로토콜 이상 탐지 · Rate-Based · 인라인 차단</text>
+
+    <!-- Arrow4 -->
+    <line x1="267" y1="304" x2="267" y2="320" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#tfAB)"/>
+    <text x="277" y="315" font-size="8" font-family="Segoe UI,sans-serif" fill="#6B93F0">검증된 패킷</text>
+    <circle r="3" fill="#3D6FE0" filter="url(#tfGlow)"><animateMotion path="M267,304 L267,320" dur="2.4s" begin="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1.5s" repeatCount="indefinite"/></circle>
+
+    <!-- WAF ④ -->
+    <rect x="18" y="322" width="498" height="58" rx="6" fill="url(#tfCard)" stroke="#E7A04A30" stroke-width="1"/>
+    <rect x="18" y="322" width="4" height="58" rx="2" fill="#E7A04A"/>
+    <circle cx="38" cy="351" r="12" fill="#E7A04A15" stroke="#E7A04A50" stroke-width="1"/>
+    <text x="38" y="355.5" text-anchor="middle" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">④</text>
+    <text x="58" y="340" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">WAF 웹 방화벽</text>
+    <rect x="58" y="345" width="62" height="13" rx="3" fill="#E7A04A15" stroke="#E7A04A35"/>
+    <text x="89" y="355" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">L7 HTTP/S</text>
+    <text x="58" y="371" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">HTTP 전체 파싱 · OWASP Top 10 · SSL Offloading · Reverse Proxy 배치</text>
+
+    <!-- Arrow5 green -->
+    <line x1="267" y1="380" x2="267" y2="396" stroke="#4AE79A" stroke-width="1.5" marker-end="url(#tfAG)"/>
+    <text x="277" y="391" font-size="8" font-family="Segoe UI,sans-serif" fill="#4AE79A">클린 요청 ✓</text>
+    <circle r="3" fill="#4AE79A" filter="url(#tfGlow)"><animateMotion path="M267,380 L267,396" dur="2.4s" begin="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="2s" repeatCount="indefinite"/></circle>
+
+    <!-- Server -->
+    <rect x="18" y="398" width="498" height="46" rx="6" fill="#0D2018" stroke="#4AE79A30" stroke-width="1"/>
+    <rect x="32" y="409" width="24" height="6" rx="1.5" fill="#4AE79A50"/><circle cx="50" cy="412" r="2" fill="#4AE79A"/>
+    <rect x="32" y="418" width="24" height="6" rx="1.5" fill="#4AE79A35"/><circle cx="50" cy="421" r="2" fill="#4AE79A70"/>
+    <rect x="32" y="427" width="24" height="5" rx="1.5" fill="#4AE79A20"/><circle cx="50" cy="429.5" r="2" fill="#4AE79A50"/>
+    <text x="66" y="415" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">내부 서버 (Protected Zone)</text>
+    <text x="66" y="432" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(74,231,154,0.45)">Web Server · WAS · Database</text>
+
+    <!-- Main traffic flow animated dot (full path) -->
+    <circle r="3.5" fill="#3D6FE0" filter="url(#tfGlow)">
+      <animateMotion dur="3.8s" repeatCount="indefinite" calcMode="linear" path="M267,28 L267,94 L267,152 L267,170 L267,228 L267,246 L267,304 L267,322 L267,380 L267,398"/>
+      <animate attributeName="opacity" values="0;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0" keyTimes="0;0.04;0.17;0.3;0.43;0.56;0.69;0.79;0.89;0.96;1" dur="3.8s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- OUT-OF-PATH separator -->
+    <line x1="528" y1="26" x2="528" y2="472" stroke="rgba(155,89,182,0.2)" stroke-width="1" stroke-dasharray="5,4"/>
+    <text transform="rotate(-90,542,255)" x="542" y="255" text-anchor="middle" font-size="7.5" font-weight="700" letter-spacing="1.5" font-family="Segoe UI,sans-serif" fill="rgba(155,89,182,0.5)">OUT-OF-PATH</text>
+
+    <!-- TAP lines: FW→Vis, IPS→Vis -->
+    <line x1="516" y1="199" x2="528" y2="199" stroke="#9B59B640" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="516" y1="275" x2="528" y2="275" stroke="#9B59B640" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="528" y1="199" x2="546" y2="218" stroke="#9B59B640" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="528" y1="275" x2="546" y2="256" stroke="#9B59B640" stroke-width="1" stroke-dasharray="3,2"/>
+
+    <!-- Syslog rail -->
+    <line x1="516" y1="123" x2="528" y2="123" stroke="rgba(61,111,224,0.25)" stroke-width="1" stroke-dasharray="2,2"/>
+    <line x1="516" y1="351" x2="528" y2="351" stroke="rgba(61,111,224,0.18)" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="528" y1="123" x2="528" y2="370" stroke="rgba(61,111,224,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="528" y1="370" x2="546" y2="370" stroke="rgba(61,111,224,0.2)" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <!-- ⑤ Visibility -->
+    <rect x="546" y="170" width="236" height="100" rx="6" fill="url(#tfCard)" stroke="#9B59B635" stroke-width="1"/>
+    <rect x="546" y="170" width="4" height="100" rx="2" fill="#9B59B6"/>
+    <ellipse cx="565" cy="206" rx="10" ry="7" fill="none" stroke="#9B59B6" stroke-width="1.5"/>
+    <circle cx="565" cy="206" r="3.5" fill="#9B59B6"/><circle cx="565" cy="206" r="1.4" fill="#0A1428"/>
+    <text x="582" y="190" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="#9B59B6">⑤</text>
+    <text x="582" y="202" font-size="10.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.9)">가시화 장비</text>
+    <rect x="582" y="207" width="72" height="13" rx="2" fill="#9B59B615" stroke="#9B59B635"/>
+    <text x="618" y="216.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#9B59B6">TAP / SPAN</text>
+    <text x="550" y="237" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.32)">NetFlow · IPFIX · 실시간 흐름</text>
+    <text x="550" y="250" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.32)">분석 · 이상 트래픽 탐지</text>
+    <text x="550" y="262" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(155,89,182,0.6)">← FW · IPS TAP 미러링</text>
+
+    <!-- Arrow Vis→SIEM -->
+    <line x1="664" y1="270" x2="664" y2="286" stroke="#9B59B6" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#tfAP)"/>
+
+    <!-- ⑥ SIEM -->
+    <rect x="546" y="288" width="236" height="162" rx="6" fill="url(#tfCard)" stroke="#3D6FE040" stroke-width="1"/>
+    <rect x="546" y="288" width="4" height="162" rx="2" fill="#3D6FE0"/>
+    <polygon points="566,300 561,316 569,313 564,332 574,313 566,316 568,300" fill="#6B93F0" opacity="0.9"/>
+    <text x="582" y="310" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">⑥</text>
+    <text x="582" y="322" font-size="10" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.9)">eyecloudxoar</text>
+    <rect x="582" y="327" width="80" height="13" rx="2" fill="#3D6FE015" stroke="#3D6FE035"/>
+    <text x="622" y="336.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">SIEM / SOAR</text>
+    <text x="550" y="357" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.32)">로그 정규화 · 상관관계 분석</text>
+    <text x="550" y="369" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.32)">위협 인텔리전스 · Playbook</text>
+    <text x="550" y="381" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.32)">자동 대응 · 티켓 생성</text>
+    <line x1="550" y1="390" x2="774" y2="390" stroke="rgba(61,111,224,0.18)" stroke-width="0.8"/>
+    <text x="550" y="403" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(61,111,224,0.55)">Syslog ← ①②③④⑤</text>
+    <text x="550" y="416" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(61,111,224,0.4)">API / SNMP 통합 수집</text>
+    <text x="550" y="440" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(61,111,224,0.4)">SMS · 이메일 · 담당자 알림</text>
+
+    <!-- TAP mirror animated dot -->
+    <circle r="2.2" fill="#9B59B6"><animateMotion dur="3.6s" begin="0.9s" repeatCount="indefinite" path="M516,199 L528,199 L546,218"/><animate attributeName="opacity" values="0;0.85;0.85;0" keyTimes="0;0.05;0.75;1" dur="3.6s" begin="0.9s" repeatCount="indefinite"/></circle>
+    <!-- Syslog animated dot -->
+    <circle r="2" fill="#3D6FE0"><animateMotion dur="4.4s" begin="2.1s" repeatCount="indefinite" path="M528,123 L528,370 L546,370 L546,340"/><animate attributeName="opacity" values="0;0.75;0.75;0" keyTimes="0;0.04;0.76;1" dur="4.4s" begin="2.1s" repeatCount="indefinite"/></circle>
+    <!-- Vis→SIEM animated dot -->
+    <circle r="2" fill="#9B59B6"><animateMotion dur="3s" begin="2.7s" repeatCount="indefinite" path="M664,270 L664,288"/><animate attributeName="opacity" values="0;0.8;0" keyTimes="0;0.3;1" dur="3s" begin="2.7s" repeatCount="indefinite"/></circle>
+
+    <text x="400" y="488" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.12)">KDN 정보보안팀 · 네트워크 트래픽 흐름도 v1.0</text>
+  </svg>
   </div>
 
   <div class="alert tip">
@@ -761,29 +877,99 @@ footer li{margin-bottom:var(--s2)}
     </table>
   </div>
 
-  <div class="flow-wrap">
-    <div class="flow-title">▶ DDoS 완화 프로세스 (스크러빙 기반)</div>
-    <div class="flow-body">
-<span class="c-block">  공격 트래픽 감지</span>
-       <span class="c-arrow">│</span>
-       <span class="c-arrow">▼</span>
-<span class="c-block">  임계치 초과 여부 판단 ─── 정상 범위 → Pass-through</span>
-       <span class="c-arrow">│ 초과</span>
-       <span class="c-arrow">▼</span>
-<span class="c-block">  BGP Announce → 공격 트래픽 Scrubbing Center 우회</span>
-       <span class="c-arrow">│</span>
-       <span class="c-arrow">▼</span>
-<span class="c-block">  Scrubbing Center</span>
-<span class="c-block">  ├─ Layer 3: src/dst IP 필터, Bogon/Martian 차단</span>
-<span class="c-block">  ├─ Layer 4: SYN Cookie · Rate Limit · 프로토콜 검증</span>
-<span class="c-block">  └─ Layer 7: HTTP 시그니처 · 행위 분석 · JS Challenge</span>
-       <span class="c-arrow">│ 정제된 트래픽</span>
-       <span class="c-arrow">▼</span>
-<span class="c-block">  GRE 터널 / MPLS → 원본 인프라로 재전달</span>
-       <span class="c-arrow">│</span>
-       <span class="c-arrow">▼</span>
-<span class="c-ok">  방화벽(②) 구간으로 전달</span>
-    </div>
+  <div class="svg-diagram">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" aria-label="DDoS 완화 프로세스 다이어그램">
+    <defs>
+      <linearGradient id="ddBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#0A1428"/></linearGradient>
+      <linearGradient id="ddCard" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E2D48"/><stop offset="100%" stop-color="#152038"/></linearGradient>
+      <linearGradient id="ddScr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A0C1A"/><stop offset="100%" stop-color="#120818"/></linearGradient>
+      <marker id="ddAR" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#E74A5A"/></marker>
+      <marker id="ddAB" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#3D6FE0"/></marker>
+      <marker id="ddAG" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#4AE79A"/></marker>
+      <filter id="ddGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.5" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+      <pattern id="ddDot" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.6" fill="#fff" opacity="0.03"/></pattern>
+    </defs>
+    <rect width="720" height="400" rx="12" fill="url(#ddBg)"/>
+    <rect width="720" height="400" rx="12" fill="url(#ddDot)"/>
+    <text x="360" y="20" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="2" font-family="Segoe UI,sans-serif" fill="#E74A5A">DDoS MITIGATION PROCESS  ·  스크러빙 기반 완화 흐름</text>
+
+    <!-- Step 1: Attack Detected -->
+    <rect x="220" y="30" width="280" height="44" rx="6" fill="url(#ddCard)" stroke="#E74A5A35" stroke-width="1"/>
+    <rect x="220" y="30" width="4" height="44" rx="2" fill="#E74A5A"/>
+    <text x="360" y="49" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.9)">🌊  공격 트래픽 감지</text>
+    <text x="360" y="64" text-anchor="middle" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.4)">bps/pps 급증 · 비정상 패킷 패턴 감지</text>
+
+    <!-- Arrow down to diamond -->
+    <line x1="360" y1="74" x2="360" y2="90" stroke="#E74A5A" stroke-width="1.5" marker-end="url(#ddAR)"/>
+
+    <!-- Decision Diamond: threshold exceeded? -->
+    <polygon points="360,92 430,120 360,148 290,120" fill="#1A0A0E" stroke="#E74A5A50" stroke-width="1.2"/>
+    <text x="360" y="116" text-anchor="middle" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.85)">임계치</text>
+    <text x="360" y="130" text-anchor="middle" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.85)">초과?</text>
+
+    <!-- NO branch → Pass-through (right) -->
+    <line x1="430" y1="120" x2="560" y2="120" stroke="#4AE79A" stroke-width="1.2" marker-end="url(#ddAG)"/>
+    <text x="488" y="113" text-anchor="middle" font-size="8" font-family="Segoe UI,sans-serif" fill="#4AE79A">정상 범위</text>
+    <rect x="562" y="100" width="130" height="40" rx="5" fill="#0D2018" stroke="#4AE79A35" stroke-width="1"/>
+    <text x="627" y="117" text-anchor="middle" font-size="9.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">Pass-through</text>
+    <text x="627" y="131" text-anchor="middle" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(74,231,154,0.5)">방화벽으로 직통</text>
+
+    <!-- YES branch → BGP (down) -->
+    <line x1="360" y1="148" x2="360" y2="164" stroke="#E74A5A" stroke-width="1.5" marker-end="url(#ddAR)"/>
+    <text x="370" y="159" font-size="8" font-family="Segoe UI,sans-serif" fill="#E74A5A">초과!</text>
+
+    <!-- Step 2: BGP Blackhole -->
+    <rect x="180" y="166" width="360" height="44" rx="6" fill="url(#ddCard)" stroke="#E74A5A35" stroke-width="1"/>
+    <rect x="180" y="166" width="4" height="44" rx="2" fill="#E74A5A"/>
+    <text x="360" y="185" text-anchor="middle" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.9)">BGP Announce → Scrubbing Center 우회</text>
+    <text x="360" y="201" text-anchor="middle" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">ISP 피어링 → 공격 트래픽 전량 스크러빙 센터로 Divert</text>
+
+    <!-- Arrow to Scrubbing -->
+    <line x1="360" y1="210" x2="360" y2="224" stroke="#E74A5A" stroke-width="1.5" marker-end="url(#ddAR)"/>
+
+    <!-- Step 3: Scrubbing Center multi-layer -->
+    <rect x="100" y="226" width="520" height="100" rx="8" fill="url(#ddScr)" stroke="#E74A5A40" stroke-width="1.2"/>
+    <text x="360" y="244" text-anchor="middle" font-size="10.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">Scrubbing Center — 다계층 정제</text>
+    <!-- L3 row -->
+    <rect x="116" y="250" width="488" height="22" rx="4" fill="#E74A5A08" stroke="#E74A5A25" stroke-width="1"/>
+    <text x="128" y="265" font-size="8.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">L3</text>
+    <text x="148" y="265" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.5)">src/dst IP 필터링 · Bogon/Martian 차단 · GeoIP 기반 Null Route</text>
+    <!-- L4 row -->
+    <rect x="116" y="275" width="488" height="22" rx="4" fill="#3D6FE008" stroke="#3D6FE025" stroke-width="1"/>
+    <text x="128" y="290" font-size="8.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">L4</text>
+    <text x="148" y="290" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.5)">SYN Cookie · SYN Proxy · Rate-Limit · UDP/ICMP 임계치 제한</text>
+    <!-- L7 row -->
+    <rect x="116" y="300" width="488" height="22" rx="4" fill="#E7A04A08" stroke="#E7A04A25" stroke-width="1"/>
+    <text x="128" y="315" font-size="8.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">L7</text>
+    <text x="148" y="315" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.5)">HTTP 시그니처 분석 · 행위 기반 탐지 · CAPTCHA / JS Challenge</text>
+
+    <!-- Arrow to GRE -->
+    <line x1="360" y1="326" x2="360" y2="340" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#ddAB)"/>
+    <text x="375" y="336" font-size="8" font-family="Segoe UI,sans-serif" fill="#6B93F0">정제된 트래픽</text>
+
+    <!-- Step 4: GRE Tunnel -->
+    <rect x="180" y="342" width="360" height="40" rx="6" fill="url(#ddCard)" stroke="#3D6FE030" stroke-width="1"/>
+    <rect x="180" y="342" width="4" height="40" rx="2" fill="#3D6FE0"/>
+    <text x="360" y="358" text-anchor="middle" font-size="10.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.9)">GRE 터널 / MPLS → 원본 인프라 재전달</text>
+    <text x="360" y="373" text-anchor="middle" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">스크러빙 센터 → ISP 라우터 → 내부 DDoS 장비 복귀</text>
+
+    <!-- Arrow to FW -->
+    <line x1="360" y1="382" x2="360" y2="393" stroke="#4AE79A" stroke-width="1.5" marker-end="url(#ddAG)"/>
+    <text x="360" y="393" text-anchor="middle" font-size="8" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">→ 방화벽 ② 구간으로 전달</text>
+
+    <!-- Animated attack dot (red going into scrubbing) -->
+    <circle r="3" fill="#E74A5A" filter="url(#ddGlow)">
+      <animateMotion path="M360,52 L360,90 L360,148 L360,166 L360,226" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.9;0.9;0.9;0" keyTimes="0;0.05;0.75;0.9;1" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Clean dot (blue coming out) -->
+    <circle r="3" fill="#3D6FE0" filter="url(#ddGlow)">
+      <animateMotion path="M360,326 L360,342 L360,382" dur="2s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.1;0.8;1" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+
+    <text x="360" y="395" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.12)">KDN 정보보안팀 · DDoS 완화 프로세스 v1.0</text>
+  </svg>
   </div>
 
   <div class="alert warn">
@@ -823,29 +1009,93 @@ footer li{margin-bottom:var(--s2)}
   </div>
 
   <h3 style="margin:var(--s5) 0 var(--s4)">Zone 기반 보안 정책 구조</h3>
-  <div class="flow-wrap">
-    <div class="flow-title">▶ 방화벽 Zone 분리 구조</div>
-    <div class="flow-body">
-<span class="c-block">  ┌─────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  Untrust Zone (인터넷)                                         │</span>
-<span class="c-block">  │  - 신뢰 수준: 0 (전혀 신뢰 안 함)                              │</span>
-<span class="c-block">  │  - 모든 인바운드 기본 차단 (Deny-All Default)                  │</span>
-<span class="c-block">  └──────────────────────┬──────────────────────────────────────────┘</span>
-                         <span class="c-arrow">│  방화벽 정책 통과</span>
-<span class="c-block">  ┌──────────────────────▼──────────────────────────────────────────┐</span>
-<span class="c-block">  │  DMZ Zone (비무장 지대)                                         │</span>
-<span class="c-block">  │  - 신뢰 수준: 1 (제한적 신뢰)                                  │</span>
-<span class="c-block">  │  - 웹 서버(80/443), DNS(53), Mail Relay(25) 등 공개 서비스     │</span>
-<span class="c-block">  │  - Trust Zone 접근 시 추가 정책 필요                           │</span>
-<span class="c-block">  └──────────────────────┬──────────────────────────────────────────┘</span>
-                         <span class="c-arrow">│  엄격한 정책</span>
-<span class="c-block">  ┌──────────────────────▼──────────────────────────────────────────┐</span>
-<span class="c-block">  │  Trust Zone (내부망)                                            │</span>
-<span class="c-block">  │  - 신뢰 수준: 2 (높은 신뢰)                                    │</span>
-<span class="c-block">  │  - WAS, DB, 내부 시스템                                        │</span>
-<span class="c-block">  │  - DMZ → Trust 직접 통신 불가 (필요 시 명시적 허용)            │</span>
-<span class="c-block">  └─────────────────────────────────────────────────────────────────┘</span>
-    </div>
+  <div class="svg-diagram">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 348" role="img" aria-label="방화벽 Zone 분리 구조 다이어그램">
+    <defs>
+      <linearGradient id="fwBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#0A1428"/></linearGradient>
+      <marker id="fwAB" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#3D6FE0"/></marker>
+      <filter id="fwGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.5" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+      <pattern id="fwDot" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.6" fill="#fff" opacity="0.03"/></pattern>
+    </defs>
+    <rect width="720" height="348" rx="12" fill="url(#fwBg)"/>
+    <rect width="720" height="348" rx="12" fill="url(#fwDot)"/>
+    <text x="360" y="20" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="2" font-family="Segoe UI,sans-serif" fill="#3D6FE0">FIREWALL ZONE ARCHITECTURE  ·  방화벽 Zone 분리 구조</text>
+
+    <!-- UNTRUST ZONE (red tint) -->
+    <rect x="18" y="30" width="684" height="82" rx="8" fill="#1A0810" stroke="#E74A5A35" stroke-width="1.2"/>
+    <rect x="18" y="30" width="6" height="82" rx="3" fill="#E74A5A"/>
+    <!-- Globe icon -->
+    <circle cx="42" cy="71" r="14" fill="none" stroke="#E74A5A50" stroke-width="1.5"/>
+    <ellipse cx="42" cy="71" rx="7" ry="14" fill="none" stroke="#E74A5A30" stroke-width="1"/>
+    <line x1="28" y1="71" x2="56" y2="71" stroke="#E74A5A30" stroke-width="1"/>
+    <text x="66" y="48" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Segoe UI,sans-serif" fill="#E74A5A">UNTRUST ZONE — 인터넷</text>
+    <rect x="66" y="53" width="90" height="14" rx="3" fill="#E74A5A15" stroke="#E74A5A35"/>
+    <text x="111" y="63" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">신뢰 수준: 0</text>
+    <text x="66" y="79" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">모든 인바운드 기본 차단 (Deny-All Default) · 신뢰 수준 없음</text>
+    <text x="66" y="95" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.3)">Raw Traffic: HTTP · HTTPS · TCP · UDP · ICMP · DDoS 포함 전체 인터넷 트래픽</text>
+
+    <!-- Firewall bar between Untrust and DMZ -->
+    <rect x="18" y="118" width="684" height="28" rx="4" fill="#1B2A4A" stroke="#3D6FE030" stroke-width="1"/>
+    <text x="360" y="130" text-anchor="middle" font-size="8" font-weight="700" letter-spacing="1" font-family="Segoe UI,sans-serif" fill="#6B93F0">🔥  방화벽 (Firewall) — Stateful Inspection · ACL Policy 적용  🔥</text>
+    <text x="360" y="141" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.35)">5-tuple 매칭: src IP · dst IP · src Port · dst Port · Protocol → 허용/차단 판정</text>
+    <!-- Policy arrows -->
+    <line x1="360" y1="112" x2="360" y2="118" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#fwAB)"/>
+    <line x1="360" y1="146" x2="360" y2="152" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#fwAB)"/>
+
+    <!-- Animated packet through firewall -->
+    <circle r="3" fill="#3D6FE0" filter="url(#fwGlow)">
+      <animateMotion path="M360,78 L360,118 L360,152" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.1;0.8;1" dur="3s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- DMZ ZONE (orange/yellow tint) -->
+    <rect x="18" y="154" width="684" height="82" rx="8" fill="#1A120A" stroke="#E7A04A35" stroke-width="1.2"/>
+    <rect x="18" y="154" width="6" height="82" rx="3" fill="#E7A04A"/>
+    <!-- Server icon for DMZ -->
+    <rect x="33" y="172" width="18" height="5" rx="1.5" fill="#E7A04A50"/><circle cx="46" cy="174.5" r="2" fill="#E7A04A"/>
+    <rect x="33" y="180" width="18" height="5" rx="1.5" fill="#E7A04A35"/><circle cx="46" cy="182.5" r="2" fill="#E7A04A70"/>
+    <rect x="33" y="188" width="18" height="5" rx="1.5" fill="#E7A04A20"/><circle cx="46" cy="190.5" r="2" fill="#E7A04A50"/>
+    <text x="62" y="172" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Segoe UI,sans-serif" fill="#E7A04A">DMZ ZONE — 비무장 지대</text>
+    <rect x="62" y="177" width="90" height="14" rx="3" fill="#E7A04A15" stroke="#E7A04A35"/>
+    <text x="107" y="187" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">신뢰 수준: 1</text>
+    <text x="62" y="203" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">공개 서비스: Web 80/443 · DNS 53 · Mail Relay 25 · FTP 21</text>
+    <text x="62" y="219" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.3)">인터넷 접근 허용 구간 · Trust Zone 직접 통신 불가 (추가 정책 필요)</text>
+    <!-- Service badges -->
+    <rect x="398" y="172" width="54" height="16" rx="3" fill="#E7A04A18" stroke="#E7A04A40"/>
+    <text x="425" y="183.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">HTTP/S</text>
+    <rect x="458" y="172" width="38" height="16" rx="3" fill="#E7A04A18" stroke="#E7A04A40"/>
+    <text x="477" y="183.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">DNS</text>
+    <rect x="502" y="172" width="44" height="16" rx="3" fill="#E7A04A18" stroke="#E7A04A40"/>
+    <text x="524" y="183.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">Mail</text>
+
+    <!-- Firewall bar between DMZ and Trust -->
+    <rect x="18" y="242" width="684" height="26" rx="4" fill="#1B2A4A" stroke="#3D6FE030" stroke-width="1"/>
+    <text x="360" y="253" text-anchor="middle" font-size="8" font-weight="700" letter-spacing="1" font-family="Segoe UI,sans-serif" fill="#6B93F0">🔥  방화벽 — 엄격한 내부망 보호 정책 적용  🔥</text>
+    <text x="360" y="264" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.35)">DMZ → Trust: 명시적 허용 규칙 없으면 전체 차단 · WAS 포트만 선택 허용</text>
+    <line x1="360" y1="236" x2="360" y2="242" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#fwAB)"/>
+    <line x1="360" y1="268" x2="360" y2="274" stroke="#4AE79A" stroke-width="1.5" marker-end="url(#fwAB)"/>
+
+    <!-- Animated packet through second FW -->
+    <circle r="3" fill="#4AE79A" filter="url(#fwGlow)">
+      <animateMotion path="M360,202 L360,242 L360,274" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.1;0.8;1" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- TRUST ZONE (green tint) -->
+    <rect x="18" y="276" width="684" height="58" rx="8" fill="#0D1A10" stroke="#4AE79A35" stroke-width="1.2"/>
+    <rect x="18" y="276" width="6" height="58" rx="3" fill="#4AE79A"/>
+    <!-- DB icons -->
+    <ellipse cx="44" cy="297" rx="14" ry="5" fill="#4AE79A25" stroke="#4AE79A50" stroke-width="1"/>
+    <rect x="30" y="297" width="28" height="12" fill="#4AE79A15"/><line x1="30" y1="297" x2="30" y2="309" stroke="#4AE79A50" stroke-width="1"/><line x1="58" y1="297" x2="58" y2="309" stroke="#4AE79A50" stroke-width="1"/>
+    <ellipse cx="44" cy="309" rx="14" ry="5" fill="#4AE79A25" stroke="#4AE79A50" stroke-width="1"/>
+    <text x="72" y="293" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Segoe UI,sans-serif" fill="#4AE79A">TRUST ZONE — 내부망 (Protected)</text>
+    <rect x="72" y="298" width="90" height="14" rx="3" fill="#4AE79A15" stroke="#4AE79A35"/>
+    <text x="117" y="308" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">신뢰 수준: 2</text>
+    <text x="72" y="323" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">WAS · Database · 내부 시스템 · 관제 서버 · 사용자 단말</text>
+    <text x="72" y="325" dy="12" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.3)">외부 직접 통신 불가 · 모든 접근 FW 통과 필수</text>
+
+    <text x="360" y="342" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.12)">KDN 정보보안팀 · 방화벽 Zone 분리 구조 v1.0</text>
+  </svg>
   </div>
 
   <h3 style="margin:var(--s6) 0 var(--s4)">ACL 정책 구성 원칙</h3>
@@ -1121,25 +1371,102 @@ footer li{margin-bottom:var(--s2)}
   </div>
 
   <h3 style="margin:var(--s6) 0 var(--s4)">상관관계 분석 (Correlation) 규칙 예시</h3>
-  <div class="flow-wrap">
-    <div class="flow-title">▶ 브루트포스 + 내부 이동 탐지 시나리오</div>
-    <div class="flow-body">
-<span class="c-label">  [Rule] SSH Brute-Force → Lateral Movement Detection</span>
+  <div class="svg-diagram">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" role="img" aria-label="SIEM 상관관계 분석 다이어그램">
+    <defs>
+      <linearGradient id="scBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#0A1428"/></linearGradient>
+      <marker id="scAB" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#3D6FE0"/></marker>
+      <marker id="scAR" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#E74A5A"/></marker>
+      <marker id="scAG" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#4AE79A"/></marker>
+      <filter id="scGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.5" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+      <pattern id="scDot" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.6" fill="#fff" opacity="0.03"/></pattern>
+    </defs>
+    <rect width="720" height="380" rx="12" fill="url(#scBg)"/>
+    <rect width="720" height="380" rx="12" fill="url(#scDot)"/>
+    <text x="360" y="20" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="2" font-family="Segoe UI,sans-serif" fill="#3D6FE0">SIEM CORRELATION RULE  ·  SSH 브루트포스 → 내부 이동 탐지</text>
 
-<span class="c-block">  조건 1: IPS 로그</span>
-<span class="c-layer">           동일 출발지 IP에서 SSH 로그인 실패 ≥ 10회 / 60초</span>
-                    <span class="c-arrow">AND</span>
-<span class="c-block">  조건 2: 방화벽 로그</span>
-<span class="c-layer">           동일 IP가 내부 다수 호스트 22번 포트 접근 시도</span>
-                    <span class="c-arrow">AND</span>
-<span class="c-block">  조건 3: OS 로그</span>
-<span class="c-layer">           이후 해당 IP에서 내부 호스트 SSH 로그인 성공 발생</span>
+    <!-- Rule header -->
+    <rect x="18" y="28" width="684" height="30" rx="5" fill="#1B2A4A" stroke="#3D6FE030" stroke-width="1"/>
+    <text x="360" y="40" text-anchor="middle" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">[Correlation Rule]  SSH Brute-Force → Lateral Movement Detection</text>
+    <text x="360" y="52" text-anchor="middle" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.35)">다중 소스 로그 교차 분석 · 시간 윈도우 60초 이내 발생 조건</text>
 
-           <span class="c-arrow">▼ 세 조건 모두 충족 시</span>
+    <!-- Condition boxes (horizontal layout) -->
+    <!-- Condition 1: IPS -->
+    <rect x="18" y="76" width="204" height="100" rx="6" fill="#0D1820" stroke="#4AE79A35" stroke-width="1.2"/>
+    <rect x="18" y="76" width="4" height="100" rx="2" fill="#4AE79A"/>
+    <text x="120" y="96" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="0.5" font-family="Segoe UI,sans-serif" fill="#4AE79A">조건 1 — IPS 로그</text>
+    <line x1="28" y1="102" x2="212" y2="102" stroke="#4AE79A20" stroke-width="0.8"/>
+    <text x="28" y="116" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">동일 src_ip에서</text>
+    <text x="28" y="130" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">SSH 로그인 실패</text>
+    <rect x="28" y="136" width="150" height="18" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="103" y="149" text-anchor="middle" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">≥ 10회 / 60초</text>
+    <text x="28" y="168" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.3)">Port 22 · Signature ID: SSH-BF</text>
 
-<span class="c-note">  🚨 HIGH Alert 생성 → eyecloudxoar 티켓 자동 생성</span>
-<span class="c-ok">  ✓  Playbook: 출발지 IP 자동 차단 + 담당자 SMS 알림</span>
-    </div>
+    <!-- Condition 2: FW -->
+    <rect x="258" y="76" width="204" height="100" rx="6" fill="#0E1020" stroke="#3D6FE035" stroke-width="1.2"/>
+    <rect x="258" y="76" width="4" height="100" rx="2" fill="#3D6FE0"/>
+    <text x="360" y="96" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="0.5" font-family="Segoe UI,sans-serif" fill="#6B93F0">조건 2 — 방화벽 로그</text>
+    <line x1="268" y1="102" x2="452" y2="102" stroke="#3D6FE020" stroke-width="0.8"/>
+    <text x="268" y="116" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">동일 IP → 내부</text>
+    <text x="268" y="130" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">다수 호스트 접근</text>
+    <rect x="268" y="136" width="150" height="18" rx="3" fill="#3D6FE018" stroke="#3D6FE035"/>
+    <text x="343" y="149" text-anchor="middle" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">Port 22 스캔 탐지</text>
+    <text x="268" y="168" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.3)">내부 subnet 스캔 · Lateral 이동 징후</text>
+
+    <!-- Condition 3: OS -->
+    <rect x="498" y="76" width="204" height="100" rx="6" fill="#1A0A0E" stroke="#E74A5A35" stroke-width="1.2"/>
+    <rect x="498" y="76" width="4" height="100" rx="2" fill="#E74A5A"/>
+    <text x="600" y="96" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="0.5" font-family="Segoe UI,sans-serif" fill="#E74A5A">조건 3 — OS 로그</text>
+    <line x1="508" y1="102" x2="692" y2="102" stroke="#E74A5A20" stroke-width="0.8"/>
+    <text x="508" y="116" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">해당 IP에서</text>
+    <text x="508" y="130" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">SSH 로그인 성공</text>
+    <rect x="508" y="136" width="150" height="18" rx="3" fill="#E74A5A18" stroke="#E74A5A35"/>
+    <text x="583" y="149" text-anchor="middle" font-size="9" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">침투 성공 확인!</text>
+    <text x="508" y="168" font-size="7.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.3)">auth.log · /var/log/secure</text>
+
+    <!-- AND connectors -->
+    <rect x="226" y="110" width="30" height="24" rx="4" fill="#1B2A4A" stroke="#3D6FE040"/>
+    <text x="241" y="126" text-anchor="middle" font-size="8.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">AND</text>
+    <rect x="466" y="110" width="30" height="24" rx="4" fill="#1B2A4A" stroke="#3D6FE040"/>
+    <text x="481" y="126" text-anchor="middle" font-size="8.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">AND</text>
+
+    <!-- Converge lines to center -->
+    <line x1="120" y1="176" x2="120" y2="200" stroke="#3D6FE0" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="360" y1="176" x2="360" y2="200" stroke="#3D6FE0" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="600" y1="176" x2="600" y2="200" stroke="#3D6FE0" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="120" y1="200" x2="600" y2="200" stroke="#3D6FE0" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="360" y1="200" x2="360" y2="214" stroke="#E74A5A" stroke-width="1.8" marker-end="url(#scAR)"/>
+    <text x="370" y="210" font-size="8" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.4)">세 조건 모두 충족</text>
+
+    <!-- Alert box -->
+    <rect x="180" y="216" width="360" height="54" rx="8" fill="#1A0810" stroke="#E74A5A60" stroke-width="1.5"/>
+    <text x="360" y="238" text-anchor="middle" font-size="13" font-weight="800" font-family="Segoe UI,sans-serif" fill="#E74A5A">🚨  HIGH ALERT 생성</text>
+    <text x="360" y="255" text-anchor="middle" font-size="9" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.55)">eyecloudxoar 인시던트 티켓 자동 생성 · 담당자 SMS 즉시 발송</text>
+    <text x="360" y="266" text-anchor="middle" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.35)">Risk Score: Critical · MITRE ATT&amp;CK: T1110 (Brute Force) → T1021 (Lateral Movement)</text>
+
+    <!-- Arrow to playbook -->
+    <line x1="360" y1="270" x2="360" y2="284" stroke="#4AE79A" stroke-width="1.5" marker-end="url(#scAG)"/>
+
+    <!-- Playbook auto-response -->
+    <rect x="100" y="286" width="520" height="56" rx="8" fill="#0A1E10" stroke="#4AE79A40" stroke-width="1.2"/>
+    <text x="360" y="307" text-anchor="middle" font-size="10.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">✅  Playbook PB-001 자동 실행</text>
+    <!-- Step chips -->
+    <rect x="116" y="316" width="104" height="16" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="168" y="327.5" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="#4AE79A">① TI 피드 IP 조회 AUTO</text>
+    <rect x="228" y="316" width="104" height="16" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="280" y="327.5" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="#4AE79A">② 방화벽 IP 차단 AUTO</text>
+    <rect x="340" y="316" width="104" height="16" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="392" y="327.5" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="#4AE79A">③ 티켓 생성 AUTO</text>
+    <rect x="452" y="316" width="100" height="16" rx="3" fill="#3D6FE018" stroke="#3D6FE035"/>
+    <text x="502" y="327.5" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="#6B93F0">④ 관제원 검토 수동</text>
+
+    <!-- Animated correlation dots -->
+    <circle r="2.5" fill="#4AE79A" filter="url(#scGlow)"><animateMotion path="M120,176 L120,200 L360,200 L360,216" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.05;0.8;1" dur="3s" repeatCount="indefinite"/></circle>
+    <circle r="2.5" fill="#3D6FE0" filter="url(#scGlow)"><animateMotion path="M600,176 L600,200 L360,200 L360,216" dur="3s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.05;0.8;1" dur="3s" begin="0.5s" repeatCount="indefinite"/></circle>
+    <circle r="2.5" fill="#E74A5A" filter="url(#scGlow)"><animateMotion path="M360,270 L360,286" dur="1.5s" begin="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="2s" repeatCount="indefinite"/></circle>
+
+    <text x="360" y="372" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.12)">KDN 정보보안팀 · SIEM 상관관계 분석 시나리오 v1.0</text>
+  </svg>
   </div>
 
   <div class="alert ok">
@@ -1157,49 +1484,135 @@ footer li{margin-bottom:var(--s2)}
   <h2 class="section-title">보안관제 파이프라인 프로세스</h2>
   <p class="section-subtitle">탐지 이벤트가 eyecloudxoar에 집계되어 티켓팅 및 Playbook 자동 대응으로 이어지는 전체 워크플로우입니다.</p>
 
-  <div class="flow-wrap">
-    <div class="flow-title">▶ 전체 보안관제 파이프라인</div>
-    <div class="flow-body">
-<span class="c-block">  ┌────────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  STAGE 1: 수집 (Collection)                                           │</span>
-<span class="c-block">  │  DDoS·방화벽·IPS·WAF·가시화 → Syslog/API → eyecloudxoar 수집기       │</span>
-<span class="c-block">  └──────────────────────────────────┬─────────────────────────────────────┘</span>
-                                     <span class="c-arrow">│</span>
-<span class="c-block">  ┌──────────────────────────────────▼─────────────────────────────────────┐</span>
-<span class="c-block">  │  STAGE 2: 정규화 (Normalization)                                       │</span>
-<span class="c-block">  │  벤더별 로그 포맷 → CEF/JSON 공통 필드 매핑                            │</span>
-<span class="c-block">  │  예) src_ip, dst_ip, action, severity, timestamp, event_id             │</span>
-<span class="c-block">  └──────────────────────────────────┬─────────────────────────────────────┘</span>
-                                     <span class="c-arrow">│</span>
-<span class="c-block">  ┌──────────────────────────────────▼─────────────────────────────────────┐</span>
-<span class="c-block">  │  STAGE 3: 상관관계 분석 (Correlation)                                  │</span>
-<span class="c-block">  │  다중 이벤트 패턴 매칭 → 위협 인텔리전스 (TI) IoC 대조                 │</span>
-<span class="c-block">  │  위험도 스코어링 (Risk Score) 산출                                      │</span>
-<span class="c-block">  └──────────────────────────────────┬─────────────────────────────────────┘</span>
-                                     <span class="c-arrow">│</span>
-<span class="c-block">  ┌──────────────────────────────────▼─────────────────────────────────────┐</span>
-<span class="c-block">  │  STAGE 4: 알람 생성 (Alert)                                            │</span>
-<span class="c-block">  │  심각도 분류: Critical / High / Medium / Low                           │</span>
-<span class="c-block">  │  담당자 알림: 이메일 / SMS / Slack                                      │</span>
-<span class="c-block">  └──────────────────────────────────┬─────────────────────────────────────┘</span>
-                                     <span class="c-arrow">│</span>
-             <span class="c-arrow">┌────────────────────┴────────────────────┐</span>
-             <span class="c-arrow">▼                                         ▼</span>
-<span class="c-block">  ┌──────────────────────┐             ┌──────────────────────────────────┐</span>
-<span class="c-block">  │  STAGE 5A: 자동 대응  │             │  STAGE 5B: 수동 분석             │</span>
-<span class="c-block">  │  Playbook 자동 실행   │             │  관제 요원 티켓 확인             │</span>
-<span class="c-block">  │  ─ IP 차단           │             │  ─ PCAP 분석                    │</span>
-<span class="c-block">  │  ─ 계정 잠금         │             │  ─ 위협 헌팅                    │</span>
-<span class="c-block">  │  ─ 격리(Isolation)   │             │  ─ 포렌식 수집                  │</span>
-<span class="c-block">  └──────────┬───────────┘             └──────────────┬───────────────────┘</span>
-             <span class="c-arrow">└────────────────────┬────────────────────┘</span>
-                                  <span class="c-arrow">▼</span>
-<span class="c-block">  ┌──────────────────────────────────────────────────────────────────────┐</span>
-<span class="c-block">  │  STAGE 6: 티켓 관리 & 사후 처리                                     │</span>
-<span class="c-block">  │  eyecloudxoar 티켓 업데이트 → 처리 결과 기록 → 사후 보고서 작성     │</span>
-<span class="c-block">  │  재발 방지: 시그니처 추가 / 정책 변경 / 취약점 패치 요청            │</span>
-<span class="c-block">  └──────────────────────────────────────────────────────────────────────┘</span>
-    </div>
+  <div class="svg-diagram">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 490" role="img" aria-label="보안관제 파이프라인 다이어그램">
+    <defs>
+      <linearGradient id="plBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#0A1428"/></linearGradient>
+      <linearGradient id="plCard" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E2D48"/><stop offset="100%" stop-color="#152038"/></linearGradient>
+      <marker id="plAB" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#3D6FE0"/></marker>
+      <marker id="plAG" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><polygon points="0,0 8,3 0,6" fill="#4AE79A"/></marker>
+      <filter id="plGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.5" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+      <pattern id="plDot" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.6" fill="#fff" opacity="0.03"/></pattern>
+    </defs>
+    <rect width="780" height="490" rx="12" fill="url(#plBg)"/>
+    <rect width="780" height="490" rx="12" fill="url(#plDot)"/>
+    <text x="390" y="20" text-anchor="middle" font-size="8.5" font-weight="700" letter-spacing="2" font-family="Segoe UI,sans-serif" fill="#3D6FE0">SOC PIPELINE  ·  보안관제 탐지-대응 워크플로우</text>
+
+    <!-- STAGE 1: Collection -->
+    <rect x="18" y="28" width="744" height="52" rx="6" fill="url(#plCard)" stroke="#3D6FE030" stroke-width="1"/>
+    <rect x="18" y="28" width="4" height="52" rx="2" fill="#3D6FE0"/>
+    <rect x="28" y="38" width="58" height="14" rx="3" fill="#3D6FE020" stroke="#3D6FE040"/>
+    <text x="57" y="48.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">STAGE 1</text>
+    <text x="98" y="44" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">수집 (Collection)</text>
+    <text x="98" y="59" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">DDoS · 방화벽 · IPS · WAF · 가시화 장비 → Syslog/API → eyecloudxoar 수집기 (Collector)</text>
+    <!-- Source badges -->
+    <rect x="500" y="35" width="42" height="14" rx="3" fill="#E74A5A18" stroke="#E74A5A35"/>
+    <text x="521" y="45.5" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="#E74A5A">DDoS</text>
+    <rect x="548" y="35" width="44" height="14" rx="3" fill="#3D6FE018" stroke="#3D6FE035"/>
+    <text x="570" y="45.5" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="#6B93F0">방화벽</text>
+    <rect x="598" y="35" width="30" height="14" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="613" y="45.5" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="#4AE79A">IPS</text>
+    <rect x="634" y="35" width="30" height="14" rx="3" fill="#E7A04A18" stroke="#E7A04A35"/>
+    <text x="649" y="45.5" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="#E7A04A">WAF</text>
+    <rect x="670" y="35" width="38" height="14" rx="3" fill="#9B59B618" stroke="#9B59B635"/>
+    <text x="689" y="45.5" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="#9B59B6">가시화</text>
+
+    <!-- Arrow 1→2 -->
+    <line x1="390" y1="80" x2="390" y2="94" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#plAB)"/>
+    <circle r="2.8" fill="#3D6FE0" filter="url(#plGlow)"><animateMotion path="M390,80 L390,94" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/></circle>
+
+    <!-- STAGE 2: Normalization -->
+    <rect x="18" y="96" width="744" height="52" rx="6" fill="url(#plCard)" stroke="#9B59B630" stroke-width="1"/>
+    <rect x="18" y="96" width="4" height="52" rx="2" fill="#9B59B6"/>
+    <rect x="28" y="106" width="58" height="14" rx="3" fill="#9B59B620" stroke="#9B59B640"/>
+    <text x="57" y="116.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#9B59B6">STAGE 2</text>
+    <text x="98" y="112" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">정규화 (Normalization)</text>
+    <text x="98" y="127" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">벤더별 로그 포맷 → CEF / LEEF / JSON 공통 필드 매핑 · 필드: src_ip, dst_ip, action, severity, timestamp</text>
+
+    <!-- Arrow 2→3 -->
+    <line x1="390" y1="148" x2="390" y2="162" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#plAB)"/>
+    <circle r="2.8" fill="#3D6FE0" filter="url(#plGlow)"><animateMotion path="M390,148 L390,162" dur="2s" begin="0.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.4s" repeatCount="indefinite"/></circle>
+
+    <!-- STAGE 3: Correlation -->
+    <rect x="18" y="164" width="744" height="52" rx="6" fill="url(#plCard)" stroke="#E7A04A30" stroke-width="1"/>
+    <rect x="18" y="164" width="4" height="52" rx="2" fill="#E7A04A"/>
+    <rect x="28" y="174" width="58" height="14" rx="3" fill="#E7A04A20" stroke="#E7A04A40"/>
+    <text x="57" y="184.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">STAGE 3</text>
+    <text x="98" y="180" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">상관관계 분석 (Correlation)</text>
+    <text x="98" y="195" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">다중 이벤트 패턴 매칭 · 위협 인텔리전스 (TI) IoC 대조 · Risk Score 산출 · MITRE ATT&amp;CK 매핑</text>
+
+    <!-- Arrow 3→4 -->
+    <line x1="390" y1="216" x2="390" y2="230" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#plAB)"/>
+    <circle r="2.8" fill="#3D6FE0" filter="url(#plGlow)"><animateMotion path="M390,216 L390,230" dur="2s" begin="0.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.8s" repeatCount="indefinite"/></circle>
+
+    <!-- STAGE 4: Alert -->
+    <rect x="18" y="232" width="744" height="52" rx="6" fill="url(#plCard)" stroke="#E74A5A30" stroke-width="1"/>
+    <rect x="18" y="232" width="4" height="52" rx="2" fill="#E74A5A"/>
+    <rect x="28" y="242" width="58" height="14" rx="3" fill="#E74A5A20" stroke="#E74A5A40"/>
+    <text x="57" y="252.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">STAGE 4</text>
+    <text x="98" y="248" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">알람 생성 (Alert)</text>
+    <text x="98" y="263" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">심각도 분류: Critical · High · Medium · Low · Info · 담당자 알림: 이메일 / SMS / Slack</text>
+    <!-- Severity chips -->
+    <rect x="500" y="242" width="52" height="14" rx="3" fill="#E74A5A25" stroke="#E74A5A50"/>
+    <text x="526" y="252.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E74A5A">Critical</text>
+    <rect x="558" y="242" width="36" height="14" rx="3" fill="#E7A04A25" stroke="#E7A04A50"/>
+    <text x="576" y="252.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#E7A04A">High</text>
+    <rect x="600" y="242" width="46" height="14" rx="3" fill="#3D6FE025" stroke="#3D6FE050"/>
+    <text x="623" y="252.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">Medium</text>
+    <rect x="652" y="242" width="34" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)"/>
+    <text x="669" y="252.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.5)">Low</text>
+
+    <!-- Branch fork lines -->
+    <line x1="390" y1="284" x2="390" y2="296" stroke="#3D6FE0" stroke-width="1.2"/>
+    <line x1="204" y1="296" x2="576" y2="296" stroke="#3D6FE0" stroke-width="1.2"/>
+    <line x1="204" y1="296" x2="204" y2="310" stroke="#4AE79A" stroke-width="1.2" marker-end="url(#plAG)"/>
+    <line x1="576" y1="296" x2="576" y2="310" stroke="#3D6FE0" stroke-width="1.2" marker-end="url(#plAB)"/>
+    <!-- Branch labels -->
+    <text x="204" y="307" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="#4AE79A">자동 대응</text>
+    <text x="576" y="307" text-anchor="middle" font-size="7.5" font-family="Segoe UI,sans-serif" fill="#6B93F0">수동 분석</text>
+
+    <!-- STAGE 5A: Auto Response -->
+    <rect x="18" y="312" width="358" height="80" rx="6" fill="#0A1E10" stroke="#4AE79A35" stroke-width="1.2"/>
+    <rect x="18" y="312" width="4" height="80" rx="2" fill="#4AE79A"/>
+    <rect x="28" y="322" width="62" height="14" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="59" y="332.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">STAGE 5A</text>
+    <text x="100" y="329" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">자동 대응 (Playbook)</text>
+    <text x="28" y="350" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">✅ IP 자동 차단 (방화벽 API)</text>
+    <text x="28" y="364" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">✅ 계정 잠금 (AD/IAM 연동)</text>
+    <text x="28" y="378" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">✅ 호스트 격리 (Isolation)</text>
+
+    <!-- STAGE 5B: Manual Analysis -->
+    <rect x="404" y="312" width="358" height="80" rx="6" fill="url(#plCard)" stroke="#3D6FE030" stroke-width="1.2"/>
+    <rect x="404" y="312" width="4" height="80" rx="2" fill="#3D6FE0"/>
+    <rect x="414" y="322" width="62" height="14" rx="3" fill="#3D6FE018" stroke="#3D6FE035"/>
+    <text x="445" y="332.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">STAGE 5B</text>
+    <text x="486" y="329" font-size="11" font-weight="700" font-family="Segoe UI,sans-serif" fill="#6B93F0">수동 분석 (Analyst)</text>
+    <text x="414" y="350" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">🔍 PCAP 패킷 분석</text>
+    <text x="414" y="364" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">🔍 위협 헌팅 (Threat Hunting)</text>
+    <text x="414" y="378" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.45)">🔍 디지털 포렌식 증거 수집</text>
+
+    <!-- Merge lines to Stage 6 -->
+    <line x1="197" y1="392" x2="197" y2="406" stroke="#4AE79A" stroke-width="1.2"/>
+    <line x1="583" y1="392" x2="583" y2="406" stroke="#3D6FE0" stroke-width="1.2"/>
+    <line x1="197" y1="406" x2="583" y2="406" stroke="#3D6FE0" stroke-width="1.2"/>
+    <line x1="390" y1="406" x2="390" y2="418" stroke="#3D6FE0" stroke-width="1.5" marker-end="url(#plAB)"/>
+
+    <!-- STAGE 6: Ticket & Post-processing -->
+    <rect x="18" y="420" width="744" height="52" rx="6" fill="url(#plCard)" stroke="#4AE79A30" stroke-width="1"/>
+    <rect x="18" y="420" width="4" height="52" rx="2" fill="#4AE79A"/>
+    <rect x="28" y="430" width="58" height="14" rx="3" fill="#4AE79A18" stroke="#4AE79A35"/>
+    <text x="57" y="440.5" text-anchor="middle" font-size="7.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="#4AE79A">STAGE 6</text>
+    <text x="98" y="436" font-size="11.5" font-weight="700" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.92)">티켓 관리 &amp; 사후 처리</text>
+    <text x="98" y="451" font-size="8.5" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.38)">eyecloudxoar 티켓 업데이트 · 처리 결과 기록 · 사후 보고서 · 재발 방지: 시그니처/정책/패치</text>
+
+    <!-- Main flow animated dot -->
+    <circle r="3" fill="#3D6FE0" filter="url(#plGlow)">
+      <animateMotion dur="5s" repeatCount="indefinite" calcMode="linear" path="M390,28 L390,96 L390,164 L390,232 L390,284 L390,296 L204,296 L204,312 L204,392 L390,406 L390,420 L390,472"/>
+      <animate attributeName="opacity" values="0;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0.9;0" keyTimes="0;0.03;0.18;0.33;0.47;0.55;0.6;0.72;0.82;0.88;0.93;0.97;1" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <text x="390" y="482" text-anchor="middle" font-size="7" font-family="Segoe UI,sans-serif" fill="rgba(255,255,255,0.12)">KDN 정보보안팀 · 보안관제 파이프라인 v1.0</text>
+  </svg>
   </div>
 
   <h3 style="margin:var(--s6) 0 var(--s4)">Playbook 예시</h3>
