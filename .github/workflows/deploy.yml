@@ -24,34 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject Supabase secrets
-        env:
-          VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: |
-          echo "=== Secrets 길이 확인 ==="
-          echo "VITE_SUPABASE_URL     길이: ${#VITE_SUPABASE_URL}"
-          echo "VITE_SUPABASE_ANON_KEY 길이: ${#VITE_SUPABASE_ANON_KEY}"
-
-          # Secrets 비어있으면 즉시 실패
-          if [ -z "${VITE_SUPABASE_URL}" ] || [ -z "${VITE_SUPABASE_ANON_KEY}" ]; then
-            echo "❌ Secrets 가 비어있습니다."
-            echo "   Repository > Settings > Secrets and variables > Actions 에서"
-            echo "   VITE_SUPABASE_URL 과 VITE_SUPABASE_ANON_KEY 를 확인하세요."
-            exit 1
-          fi
-
-          # 플레이스홀더 치환
-          sed -i "s|__SUPABASE_URL__|${VITE_SUPABASE_URL}|g"           index.html
-          sed -i "s|__SUPABASE_ANON_KEY__|${VITE_SUPABASE_ANON_KEY}|g" index.html
-
-          # 치환 결과 검증 — 플레이스홀더가 남아있으면 실패
-          if grep -q "__SUPABASE" index.html; then
-            echo "❌ 치환 실패 — 플레이스홀더가 남아있습니다."
-            exit 1
-          fi
-          echo "✅ Supabase secrets 주입 완료"
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
