@@ -1988,13 +1988,24 @@ body:not(.auth-ready) footer{visibility:hidden}
 <script>
 /* ═══════════════════════════════════════════════════════════════
    SUPABASE AUTH  —  Magic Link (Passwordless Email)
-   ⚠️  아래 두 값을 Supabase 프로젝트 설정에서 복사해 붙여넣으세요.
    ═══════════════════════════════════════════════════════════════ */
 const SUPABASE_URL      = '__SUPABASE_URL__';
 const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
 
-// Supabase 클라이언트 초기화
-const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// _sb : 최초 사용 시점에 초기화 (지연 초기화 — TDZ·CDN 미로드 방지)
+let _sb = null;
+
+function getClient() {
+  if (_sb) return _sb;
+  if (typeof supabase === 'undefined') {
+    throw new Error('보안 모듈을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
+  }
+  if (SUPABASE_URL.startsWith('__') || SUPABASE_ANON_KEY.startsWith('__')) {
+    throw new Error('인증 설정이 완료되지 않았습니다. 관리자에게 문의하세요.');
+  }
+  _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _sb;
+}
 
 /* ── UI 헬퍼 ─────────────────────────────────────────────────── */
 function showApp(user) {
@@ -2066,7 +2077,7 @@ async function sendMagicLink() {
       setTimeout(() => reject(new Error('요청 시간이 초과됐습니다. 네트워크 상태를 확인해 주세요.')), TIMEOUT_MS)
     );
 
-    const otpPromise = _sb.auth.signInWithOtp({
+    const otpPromise = getClient().auth.signInWithOtp({
       email,
       options: { emailRedirectTo: window.location.origin + window.location.pathname },
     });
@@ -2091,30 +2102,35 @@ async function sendMagicLink() {
 
 /* ── 로그아웃 ──────────────────────────────────────────────────── */
 async function handleLogout() {
-  await _sb.auth.signOut();
+  await getClient().auth.signOut();
   showOverlay();
   resetAuthForm();
 }
 
 /* ── 인증 초기화 (페이지 로드 시 실행) ──────────────────────────── */
 async function initAuth() {
-  // 현재 세션 확인 (매직 링크 콜백 포함)
-  const { data: { session } } = await _sb.auth.getSession();
+  try {
+    const sb = getClient();
 
-  if (session) {
-    showApp(session.user);
-  } else {
-    showOverlay();
-  }
+    // 현재 세션 확인 (매직 링크 콜백 포함)
+    const { data: { session } } = await sb.auth.getSession();
 
-  // 세션 상태 변화 감지 (매직 링크 클릭 후 자동 처리)
-  _sb.auth.onAuthStateChange((_event, session) => {
     if (session) {
       showApp(session.user);
     } else {
       showOverlay();
     }
-  });
+
+    // 세션 상태 변화 감지 (매직 링크 클릭 후 자동 처리)
+    sb.auth.onAuthStateChange((_event, session) => {
+      if (session) showApp(session.user);
+      else         showOverlay();
+    });
+
+  } catch (err) {
+    console.error('[Auth] initAuth 오류:', err);
+    showOverlay();  // 오류 시에도 오버레이는 정상 표시
+  }
 }
 
 /* ── 사이드바 스크롤 활성화 ─────────────────────────────────────── */
